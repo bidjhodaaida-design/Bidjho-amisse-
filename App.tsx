@@ -1,308 +1,106 @@
-
-import React, { useState, useMemo } from 'react';
-import { 
-  Sparkles, 
-  Search, 
-  Droplets, 
-  Leaf, 
-  User, 
-  MessageCircle, 
-  X, 
-  ArrowRight,
-  Loader2,
-  Camera,
-  Heart
+import React, { useMemo, useState } from 'react';
+import {
+  AlertTriangle,
+  Award,
+  BarChart3,
+  Brain,
+  Crown,
+  Gauge,
+  Home,
+  LineChart,
+  LogIn,
+  Settings,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  UserPlus,
+  Wallet,
 } from 'lucide-react';
-import { getSkinAdvice, generateRecipeVisual } from './services/geminiService';
 
-const RECIPES = [
-  { id: 1, name: "Máscara de Mel e Aveia", ingredients: "1 colher de mel, 2 colheres de aveia", method: "Misture bem até formar pasta. Aplique no rosto limpo por 15 minutos. Enxágue com água morna e seque suavemente.", category: "Máscara", benefit: "Hidratação" },
-  { id: 2, name: "Esfoliante de Café", ingredients: "2 colheres de borra de café, 1 colher de óleo de coco", method: "Misture e massageie o rosto com movimentos circulares por 2-3 minutos. Enxágue com água morna.", category: "Esfoliante", benefit: "Renovação" },
-  { id: 3, name: "Máscara de Iogurte e Limão", ingredients: "2 colheres de iogurte natural, 2-3 gotas de limão", method: "Misture e aplique no rosto limpo por 10 minutos. Enxágue com água fria. Evite sol direto.", category: "Máscara", benefit: "Luminosidade" },
-  { id: 4, name: "Máscara de Babosa (Aloe Vera)", ingredients: "2 colheres de gel de babosa", method: "Aplique no rosto limpo por 20 minutos. Enxágue com água fria.", category: "Máscara", benefit: "Calmante" },
-  { id: 5, name: "Água de Rosas (Tônico)", ingredients: "Água de rosas pura", method: "Borrife ou aplique com algodão no rosto limpo. Não enxágue.", category: "Tônico", benefit: "Equilíbrio" },
-  { id: 6, name: "Máscara de Pepino", ingredients: "Meio pepino ralado, 1 colher de iogurte", method: "Misture e aplique no rosto 15 minutos. Enxágue com água fria.", category: "Máscara", benefit: "Refrescante" },
-  { id: 7, name: "Máscara de Argila Verde", ingredients: "2 colheres de argila verde, água mineral", method: "Misture até formar pasta. Aplique no rosto limpo 15 minutos e enxágue.", category: "Máscara", benefit: "Oleosidade" },
-  { id: 8, name: "Máscara de Clara de Ovo", ingredients: "1 clara de ovo", method: "Bata e aplique no rosto 10 minutos. Enxágue com água fria.", category: "Máscara", benefit: "Firmeza" },
-  { id: 9, name: "Máscara de Aveia e Leite", ingredients: "2 colheres de aveia, leite suficiente", method: "Misture, aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Suavidade" },
-  { id: 10, name: "Máscara de Morango", ingredients: "3 morangos maduros, 1 colher de mel", method: "Amasse os morangos, misture com mel. Aplique 10 minutos e enxágue.", category: "Máscara", benefit: "Antioxidante" },
-  { id: 11, name: "Máscara de Cenoura", ingredients: "1 cenoura cozida, 2 colheres de iogurte", method: "Amasse a cenoura, misture com iogurte. Aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Nutrição" },
-  { id: 12, name: "Máscara de Abacate", ingredients: "Meio abacate maduro, 1 colher de mel", method: "Amasse e misture com mel. Aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Nutrição Profunda" },
-  { id: 13, name: "Máscara de Aveia e Mel", ingredients: "2 colheres de aveia, 1 colher de mel", method: "Misture, aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Esfoliação Suave" },
-  { id: 14, name: "Máscara de Banana", ingredients: "1 banana madura", method: "Amasse e aplique no rosto 15 minutos. Enxágue.", category: "Máscara", benefit: "Potássio" },
-  { id: 15, name: "Máscara de Chá Verde", ingredients: "2 colheres de chá verde frio", method: "Use como compressa no rosto 10 minutos. Não enxágue.", category: "Compressa", benefit: "Desintoxicação" },
-  { id: 16, name: "Máscara de Iogurte e Mel", ingredients: "2 colheres de iogurte, 1 colher de mel", method: "Misture, aplique 10 minutos e enxágue.", category: "Máscara", benefit: "Hidratação" },
-  { id: 17, name: "Máscara de Pepino e Aveia", ingredients: "Meio pepino ralado, 1 colher de aveia", method: "Misture, aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Purificação" },
-  { id: 18, name: "Máscara de Maçã", ingredients: "1 maçã, 1 colher de mel", method: "Amasse a maçã, misture com mel. Aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Vigor" },
-  { id: 19, name: "Máscara de Iogurte e Aveia", ingredients: "2 colheres de iogurte, 1 colher de aveia", method: "Misture, aplique 15 minutos e enxágue.", category: "Máscara", benefit: "Equilíbrio pH" },
-  { id: 20, name: "Máscara de Mel e Limão", ingredients: "1 colher de mel, algumas gotas de limão", method: "Misture, aplique 10 minutos e enxágue. Evite sol direto após aplicar.", category: "Máscara", benefit: "Manchas" },
+type Screen = 'splash' | 'login' | 'cadastro' | 'home' | 'relatorios' | 'ia' | 'perfil' | 'config';
+
+type Transaction = { id: number; title: string; amount: number; type: 'income' | 'expense'; category: string; date: string };
+
+type Goal = { id: number; name: string; current: number; total: number };
+
+const incomeCategories = ['Salário', 'Negócio', 'Freelance', 'M-Pesa', 'E-mola', 'Bónus', 'Outros'];
+const expenseCategories = ['Transporte chapa', 'Combustível', 'Energia', 'Água', 'Renda', 'Internet', 'Mercado', 'Escola', 'Xima/comida', 'Airtel', 'Vodacom', 'Movitel', 'Dívidas', 'Saúde', 'Entretenimento'];
+
+const seedTransactions: Transaction[] = [
+  { id: 1, title: 'Salário Abril', amount: 42000, type: 'income', category: 'Salário', date: '2026-05-02' },
+  { id: 2, title: 'Mercado semanal', amount: 3900, type: 'expense', category: 'Mercado', date: '2026-05-05' },
+  { id: 3, title: 'Freelance design', amount: 6500, type: 'income', category: 'Freelance', date: '2026-05-09' },
+  { id: 4, title: 'Transporte chapa', amount: 1200, type: 'expense', category: 'Transporte chapa', date: '2026-05-10' },
 ];
 
+const seedGoals: Goal[] = [
+  { id: 1, name: 'Comprar terreno', current: 120000, total: 450000 },
+  { id: 2, name: 'Comprar motorizada', current: 46000, total: 95000 },
+  { id: 3, name: 'Construir casa', current: 275000, total: 1200000 },
+];
+
+const mzn = (v: number) => `${v.toLocaleString('pt-MZ')} MZN`;
+
 const App: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRecipe, setSelectedRecipe] = useState<typeof RECIPES[0] | null>(null);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [isGeneratingImg, setIsGeneratingImg] = useState(false);
-  
-  const [isConsulting, setIsConsulting] = useState(false);
-  const [advice, setAdvice] = useState<string | null>(null);
-  const [skinType, setSkinType] = useState('normal');
-  const [concern, setConcern] = useState('');
-  const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const [screen, setScreen] = useState<Screen>('splash');
+  const [transactions, setTransactions] = useState(seedTransactions);
+  const [goals] = useState(seedGoals);
+  const [plan, setPlan] = useState<'free' | 'premium'>('free');
+  const [offlineMode, setOfflineMode] = useState(true);
 
-  const filteredRecipes = useMemo(() => {
-    return RECIPES.filter(r => 
-      r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      r.benefit.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
+  const summary = useMemo(() => {
+    const income = transactions.filter((t) => t.type === 'income').reduce((a, b) => a + b.amount, 0);
+    const expense = transactions.filter((t) => t.type === 'expense').reduce((a, b) => a + b.amount, 0);
+    return { income, expense, balance: income - expense };
+  }, [transactions]);
 
-  const handleRecipeClick = (recipe: typeof RECIPES[0]) => {
-    setSelectedRecipe(recipe);
-    setGeneratedImage(null);
+  const addDemo = (type: 'income' | 'expense') => {
+    const category = type === 'income' ? incomeCategories[3] : expenseCategories[0];
+    const amount = type === 'income' ? 1500 : 700;
+    setTransactions((prev) => [{ id: Date.now(), title: type === 'income' ? 'Entrada rápida' : 'Saída rápida', amount, type, category, date: '2026-05-14' }, ...prev]);
   };
 
-  const handleGenerateImage = async () => {
-    if (!selectedRecipe) return;
-    setIsGeneratingImg(true);
-    const img = await generateRecipeVisual(selectedRecipe.name, selectedRecipe.ingredients);
-    setGeneratedImage(img);
-    setIsGeneratingImg(false);
-  };
+  if (screen === 'splash') {
+    return <div className="min-h-screen bg-[#0b0f0e] text-white flex flex-col items-center justify-center gap-4">
+      <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-emerald-400 to-emerald-700 grid place-items-center shadow-2xl"><Wallet /></div>
+      <h1 className="text-4xl font-black">Peso Smart MZ</h1>
+      <p className="text-emerald-100/80">Controle financeiro inteligente para Moçambique</p>
+      <button className="mt-4 px-5 py-3 rounded-2xl bg-white text-black font-semibold" onClick={() => setScreen('login')}>Entrar</button>
+    </div>;
+  }
 
-  const handleGetAdvice = async () => {
-    if (!concern) return;
-    setLoadingAdvice(true);
-    const res = await getSkinAdvice(skinType, concern);
-    setAdvice(res);
-    setLoadingAdvice(false);
-  };
+  const Nav = () => <nav className="fixed bottom-0 inset-x-0 bg-black/90 border-t border-emerald-900 p-3 flex justify-around text-xs">
+    {[
+      ['home', Home], ['relatorios', LineChart], ['ia', Brain], ['perfil', Crown], ['config', Settings]
+    ].map(([key, Icon]) => <button key={key} onClick={() => setScreen(key as Screen)} className={`flex flex-col items-center gap-1 ${screen === key ? 'text-emerald-400' : 'text-gray-400'}`}><Icon size={16} />{key}</button>)}
+  </nav>;
 
-  return (
-    <div className="min-h-screen pb-20">
-      {/* Header */}
-      <header className="bg-white/70 backdrop-blur-md sticky top-0 z-40 border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
-              <Leaf className="text-white" size={20} />
-            </div>
-            <h1 className="text-2xl font-bold text-stone-800 tracking-tight">Pele Limpa</h1>
-          </div>
-          
-          <div className="relative w-full max-w-md hidden md:block">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Buscar por benefício (ex: manchas)..." 
-              className="w-full bg-stone-100 border-none rounded-full pl-10 pr-4 py-2 focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+  return <div className="min-h-screen bg-[#f6f8f7] text-[#121212] pb-24">
+    {screen === 'login' && <section className="p-6 max-w-md mx-auto pt-20">
+      <h2 className="text-3xl font-bold mb-2">Login</h2><p className="text-gray-500 mb-8">Acesse seu cofre financeiro.</p>
+      <button onClick={() => setScreen('home')} className="w-full mb-3 rounded-2xl bg-black text-white py-3 flex items-center justify-center gap-2"><LogIn size={18}/>Entrar</button>
+      <button onClick={() => setScreen('cadastro')} className="w-full rounded-2xl border py-3 flex items-center justify-center gap-2"><UserPlus size={18}/>Criar conta</button>
+    </section>}
 
-          <button 
-            onClick={() => setIsConsulting(true)}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full font-medium transition-all shadow-lg shadow-emerald-200 active:scale-95"
-          >
-            <Sparkles size={18} />
-            <span className="hidden sm:inline">Consultor IA</span>
-          </button>
-        </div>
+    {screen === 'cadastro' && <section className="p-6 max-w-md mx-auto pt-20"><h2 className="text-3xl font-bold">Cadastro</h2><p className="text-gray-500 mb-6">Novo utilizador do Peso Smart MZ.</p><button onClick={() => setScreen('home')} className="rounded-2xl bg-emerald-600 text-white px-5 py-3">Concluir</button></section>}
+
+    {screen === 'home' && <section className="p-5 space-y-4">
+      <header className="rounded-3xl bg-gradient-to-br from-black to-[#1a2925] text-white p-5">
+        <p className="text-sm text-emerald-300">Saldo atual</p><h2 className="text-3xl font-black">{mzn(summary.balance)}</h2>
+        <div className="grid grid-cols-2 gap-3 mt-4 text-sm"><div className="bg-white/10 p-3 rounded-2xl"><TrendingUp size={15}/> Receitas: {mzn(summary.income)}</div><div className="bg-white/10 p-3 rounded-2xl"><TrendingDown size={15}/> Despesas: {mzn(summary.expense)}</div></div>
       </header>
+      <div className="grid grid-cols-2 gap-3"><button onClick={() => addDemo('income')} className="bg-emerald-600 text-white p-3 rounded-2xl">+ Receita</button><button onClick={() => addDemo('expense')} className="bg-black text-white p-3 rounded-2xl">+ Despesa</button></div>
+      <article className="bg-white rounded-3xl p-4 shadow-sm"><h3 className="font-semibold flex items-center gap-2"><BarChart3 size={16}/>Gráficos & Alertas</h3><p className="text-sm text-gray-600 mt-2">Você gastou 18% acima da média em Transporte chapa.</p><div className="h-3 rounded-full bg-gray-100 mt-3"><div className="h-3 rounded-full bg-emerald-500" style={{width:'62%'}}/></div></article>
+      <article className="bg-white rounded-3xl p-4"><h3 className="font-semibold flex items-center gap-2"><Target size={16}/>Metas financeiras</h3>{goals.map(g=>{const pct=Math.round((g.current/g.total)*100);return <div key={g.id} className="mt-3"><div className="flex justify-between text-sm"><span>{g.name}</span><span>{pct}%</span></div><div className="h-2 bg-gray-100 rounded-full"><div className="h-2 bg-black rounded-full" style={{width:`${pct}%`}}/></div><p className="text-xs text-gray-500">{mzn(g.current)} de {mzn(g.total)}</p></div>;})}</article>
+    </section>}
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 py-16 text-center">
-        <h2 className="text-5xl md:text-6xl font-black text-stone-800 mb-6 leading-tight">
-          Natureza em sua <span className="text-emerald-600 italic">pele</span>.
-        </h2>
-        <p className="text-stone-500 text-lg max-w-2xl mx-auto leading-relaxed">
-          Descubra o poder dos ingredientes naturais. 20 receitas artesanais criadas para restaurar, nutrir e iluminar o seu rosto diariamente.
-        </p>
-      </section>
-
-      {/* Recipe Grid */}
-      <main className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredRecipes.map((recipe) => (
-            <div 
-              key={recipe.id}
-              onClick={() => handleRecipeClick(recipe)}
-              className="group bg-white rounded-3xl p-6 border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer relative overflow-hidden"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest rounded-full border border-emerald-100">
-                  {recipe.benefit}
-                </span>
-                <Heart size={16} className="text-stone-300 hover:text-red-400 transition-colors" />
-              </div>
-              <h3 className="text-xl font-bold text-stone-800 mb-2 group-hover:text-emerald-600 transition-colors">{recipe.name}</h3>
-              <p className="text-stone-400 text-sm line-clamp-2">{recipe.ingredients}</p>
-              
-              <div className="mt-6 flex items-center text-emerald-600 text-xs font-bold gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                VER RECEITA <ArrowRight size={14} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </main>
-
-      {/* Recipe Modal */}
-      {selectedRecipe && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] animate-in zoom-in-95 duration-300">
-            <div className="md:w-1/2 bg-stone-50 relative min-h-[300px] flex items-center justify-center">
-              {generatedImage ? (
-                <img src={generatedImage} alt={selectedRecipe.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center p-12 text-center">
-                  <div className={`p-4 rounded-full mb-4 ${isGeneratingImg ? 'bg-emerald-50' : 'bg-stone-100'}`}>
-                    {isGeneratingImg ? <Loader2 size={32} className="text-emerald-500 animate-spin" /> : <Camera size={32} className="text-stone-300" />}
-                  </div>
-                  <h4 className="font-bold text-stone-700 mb-2">Visualização IA</h4>
-                  <p className="text-stone-400 text-xs mb-6">Gere uma imagem artística desta receita em um ambiente de spa.</p>
-                  <button 
-                    onClick={handleGenerateImage}
-                    disabled={isGeneratingImg}
-                    className="bg-stone-800 text-white px-6 py-2 rounded-full text-sm font-bold hover:bg-stone-700 transition-colors disabled:opacity-50"
-                  >
-                    {isGeneratingImg ? 'Gerando...' : 'Gerar Imagem'}
-                  </button>
-                </div>
-              )}
-            </div>
-            
-            <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto custom-scrollbar">
-              <button 
-                onClick={() => setSelectedRecipe(null)}
-                className="absolute top-6 right-6 p-2 text-stone-400 hover:text-stone-900 transition-colors"
-              >
-                <X size={24} />
-              </button>
-              
-              <div className="mb-8">
-                <span className="text-emerald-600 text-xs font-bold uppercase tracking-widest">{selectedRecipe.category}</span>
-                <h2 className="text-3xl font-black text-stone-800 mt-2 mb-4">{selectedRecipe.name}</h2>
-                <div className="flex items-center gap-2 text-stone-500 text-sm">
-                  <Droplets size={16} /> <span>Foco: {selectedRecipe.benefit}</span>
-                </div>
-              </div>
-
-              <div className="space-y-8">
-                <div>
-                  <h4 className="font-bold text-stone-800 text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Ingredientes
-                  </h4>
-                  <p className="text-stone-600 leading-relaxed bg-stone-50 p-4 rounded-2xl border border-stone-100">
-                    {selectedRecipe.ingredients}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="font-bold text-stone-800 text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span> Modo de Preparo
-                  </h4>
-                  <p className="text-stone-600 leading-relaxed italic">
-                    {selectedRecipe.method}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AI Consultation Panel */}
-      {isConsulting && (
-        <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-[-20px_0_60px_rgba(0,0,0,0.1)] z-[60] flex flex-col animate-in slide-in-from-right duration-500">
-          <div className="p-8 border-b border-stone-100 flex items-center justify-between bg-emerald-600 text-white">
-            <div className="flex items-center gap-3">
-              <Sparkles size={24} />
-              <h2 className="text-xl font-bold">Consultor IA</h2>
-            </div>
-            <button onClick={() => setIsConsulting(false)} className="hover:rotate-90 transition-transform">
-              <X size={24} />
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-6">
-            {!advice ? (
-              <>
-                <div className="p-4 bg-emerald-50 rounded-2xl text-emerald-800 text-sm leading-relaxed">
-                  Olá! Sou o seu assistente de beleza. Me diga seu tipo de pele e o que gostaria de melhorar, e eu indicarei as melhores receitas naturais para você.
-                </div>
-                
-                <div className="space-y-4 pt-4">
-                  <div>
-                    <label className="text-xs font-bold text-stone-400 uppercase mb-2 block">Tipo de Pele</label>
-                    <select 
-                      value={skinType}
-                      onChange={(e) => setSkinType(e.target.value)}
-                      className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
-                    >
-                      <option value="oleosa">Oleosa</option>
-                      <option value="seca">Seca</option>
-                      <option value="mista">Mista</option>
-                      <option value="normal">Normal</option>
-                      <option value="sensível">Sensível</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="text-xs font-bold text-stone-400 uppercase mb-2 block">Sua Preocupação</label>
-                    <textarea 
-                      placeholder="Ex: acne, manchas de sol, olheiras..."
-                      className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 min-h-[100px]"
-                      value={concern}
-                      onChange={(e) => setConcern(e.target.value)}
-                    />
-                  </div>
-                  
-                  <button 
-                    onClick={handleGetAdvice}
-                    disabled={loadingAdvice || !concern}
-                    className="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {loadingAdvice ? <Loader2 size={18} className="animate-spin" /> : <MessageCircle size={18} />}
-                    Obter Recomendação
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="bg-stone-50 p-6 rounded-3xl border border-stone-100 text-stone-700 leading-relaxed whitespace-pre-wrap">
-                  {advice}
-                </div>
-                <button 
-                  onClick={() => setAdvice(null)}
-                  className="w-full py-3 border-2 border-emerald-600 text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition-all"
-                >
-                  Nova Consulta
-                </button>
-              </div>
-            )}
-          </div>
-          
-          <footer className="p-8 text-center text-[10px] text-stone-400 border-t border-stone-100">
-            Lembre-se: consulte sempre um dermatologista. Esta IA fornece apenas sugestões de cuidados naturais.
-          </footer>
-        </div>
-      )}
-
-      {/* Footer */}
-      <footer className="mt-20 py-12 border-t border-stone-200 text-center">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-8 h-8 bg-stone-800 rounded-full flex items-center justify-center">
-              <Leaf className="text-white" size={14} />
-            </div>
-            <h1 className="text-lg font-bold text-stone-800 tracking-tight">Pele Limpa</h1>
-          </div>
-          <p className="text-stone-400 text-xs">Desenvolvido com carinho por Bidjho Amisse & Gemini AI</p>
-        </div>
-      </footer>
-    </div>
-  );
+    {screen === 'relatorios' && <section className="p-5"><h2 className="text-2xl font-bold flex items-center gap-2"><LineChart/>Relatórios</h2><p className="text-gray-500">Resumo automático mensal, exportação PDF e visão por operadora (Airtel/Vodacom/Movitel) no Premium.</p></section>}
+    {screen === 'ia' && <section className="p-5 space-y-3"><h2 className="text-2xl font-bold flex items-center gap-2"><Sparkles/>IA Financeira</h2><div className="bg-white rounded-3xl p-4"><p className="font-semibold">Análise inteligente</p><p className="text-sm text-gray-600">Se reduzir Mercado em 8% e Airtel em 10%, você poupa ~{mzn(2100)}/mês.</p></div><div className="bg-black text-white rounded-3xl p-4"><p className="font-semibold">Motivação</p><p>Continue firme! Faltam 52% para sua motorizada 🏍️</p></div></section>}
+    {screen === 'perfil' && <section className="p-5"><h2 className="text-2xl font-bold flex items-center gap-2"><Award/>Gamificação</h2><div className="bg-white rounded-3xl p-4 mt-3"><p>Nível atual: <b>7</b> <Gauge className="inline" size={14}/></p><p className="text-sm text-gray-600">Conquistas: Guardião do Orçamento, Ninja do M-Pesa.</p></div></section>}
+    {screen === 'config' && <section className="p-5 space-y-3"><h2 className="text-2xl font-bold">Configurações</h2><div className="bg-white rounded-2xl p-4 flex justify-between"><span>Modo offline</span><button onClick={()=>setOfflineMode(!offlineMode)}>{offlineMode?'Ativo':'Inativo'}</button></div><div className="bg-white rounded-2xl p-4 flex justify-between"><span>Plano</span><button onClick={()=>setPlan(plan==='free'?'premium':'free')} className="font-semibold">{plan==='free'?'Grátis (50 transações)':'Premium'}</button></div><p className="text-sm text-gray-500 flex gap-2"><AlertTriangle size={15}/>Sincroniza automaticamente ao reconectar.</p></section>}
+    <Nav />
+  </div>;
 };
 
 export default App;
